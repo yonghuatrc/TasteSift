@@ -22,7 +22,9 @@ export function validateImage(bytes: Uint8Array, claimedType: string): { content
 }
 
 export async function readImageUpload(request: Request): Promise<File> {
-  const maximumBody = MAX_IMAGE_BYTES + 64 * 1024;
+  const contentType = request.headers.get("content-type") ?? "";
+  const multipart = contentType.startsWith("multipart/form-data;");
+  const maximumBody = multipart ? MAX_IMAGE_BYTES + 64 * 1024 : MAX_IMAGE_BYTES;
   if (Number(request.headers.get("content-length")) > maximumBody) throw new Error("imageTooLarge");
   const reader = request.body?.getReader();
   if (!reader) throw new Error("imageInvalid");
@@ -40,7 +42,8 @@ export async function readImageUpload(request: Request): Promise<File> {
   const bytes = new Uint8Array(size);
   let offset = 0;
   for (const part of parts) { bytes.set(part, offset); offset += part.length; }
-  const form = await new Response(bytes, { headers: { "content-type": request.headers.get("content-type") ?? "" } }).formData();
+  if (!multipart) return new File([bytes], "cover", { type: contentType });
+  const form = await new Response(bytes, { headers: { "content-type": contentType } }).formData();
   const file = form.get("image");
   if (!(file instanceof File)) throw new Error("imageInvalid");
   return file;

@@ -31,3 +31,13 @@ test("clipboard paste selects one image and leaves ordinary text alone", () => {
   assert.equal(clipboardImage({ files: [text], items: [] }), null);
   assert.equal(clipboardImage({ files: [], items: [{ kind: "file", type: "image/png", getAsFile: () => image }] }), image);
 });
+
+test("accepts raw image uploads above the framework's multipart limit", async () => {
+  const bytes = new Uint8Array(3_768_000);
+  bytes.set([255, 216, 255]);
+  bytes.set([255, 217], bytes.length - 2);
+  const request = new Request("https://example.com/upload", { method: "POST", body: bytes, headers: { "content-type": "image/jpeg" } });
+  const file = await readImageUpload(request);
+  assert.equal(file.size, bytes.length);
+  assert.deepEqual(validateImage(new Uint8Array(await file.arrayBuffer()), file.type), { contentType: "image/jpeg", extension: "jpg" });
+});

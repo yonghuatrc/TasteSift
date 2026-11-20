@@ -17,8 +17,9 @@ export function RecipeImageField({ value, onChange, onBusy }: { value: string; o
     setUploading(true); onBusy(true); setError(null);
     try {
       if (typeof createImageBitmap === "function") { const bitmap = await createImageBitmap(file); bitmap.close(); }
-      const form = new FormData(); form.set("image", file);
-      const response = await fetch("/api/recipe-images", { method: "POST", body: form });
+      // A multipart POST can hit Vinext's server-action limit before reaching this route.
+      const response = await fetch("/api/recipe-images", { method: "POST", body: file });
+      if (response.status === 413) { setError("imageTooLarge"); return; }
       const result = await response.json() as { imageUrl?: string; error?: string };
       if (!response.ok || !result.imageUrl) {
         setError(result.error === "imageTooLarge" ? "imageTooLarge" : result.error === "imageInvalid" ? "imageInvalid" : "uploadFailed");
@@ -35,10 +36,11 @@ export function RecipeImageField({ value, onChange, onBusy }: { value: string; o
       <p className="mt-3 text-center text-sm font-semibold text-[#24533d]">{t("pasteImage")}</p>
       <p className="mt-1 text-center text-xs leading-5 text-[#68756d]">{t("pasteImageHelp")}</p>
     </div>
-    <label className="field-label"><span>{t("upload")}</span><input className="field-control" accept="image/jpeg,image/png,image/webp" type="file" disabled={uploading} onChange={(event) => void upload(event.target.files?.[0])} /></label>
+    {value && <button className="button-secondary self-start" type="button" disabled={uploading} onClick={() => { onChange(""); setBroken(false); setError(null); }}>{t("removeCover")}</button>}
+    <label className="field-label"><span>{t("upload")}</span><input className="field-control" accept="image/jpeg,image/png,image/webp" type="file" disabled={uploading} onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void upload(file); }} /></label>
     <p className="text-sm leading-6 text-[#68756d]" role="status">{t(uploading ? "uploading" : "uploadHelp")}</p>
     {error && <p className="field-error" role="alert">{t(error)}</p>}
-    <details><summary className="cursor-pointer text-sm font-semibold text-[#24533d]">{t("imageUrl")}</summary><input className="field-control mt-3" aria-label={t("imageUrl")} value={value} onChange={(event) => { onChange(event.target.value); setBroken(false); }} /></details>
+    <details><summary className="cursor-pointer text-sm font-semibold text-[#24533d]">{t("imageUrl")}</summary><input className="field-control mt-3" aria-label={t("imageUrl")} value={value} disabled={uploading} onChange={(event) => { onChange(event.target.value); setBroken(false); setError(null); }} /></details>
     <input name="imageUrl" type="hidden" value={value} />
   </section>;
 }
