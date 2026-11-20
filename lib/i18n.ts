@@ -51,6 +51,7 @@ const words = {
   pasteImage: ["点击这里，粘贴一张图片", "Click here to paste an image"], pasteImageHelp: ["复制截图后，点击此区域并按 ⌘V 或 Ctrl+V。粘贴成功后替换当前封面。", "Copy a screenshot, click this area, then press ⌘V or Ctrl+V. A successful paste replaces the cover."],
   uploadHelp: ["支持 JPEG、PNG、WebP，最大 5 MB。成功上传后会显示预览。", "JPEG, PNG or WebP, up to 5 MB. A preview appears after upload."],
   imageUrl: ["或使用图片链接", "Or use an image URL"], missingImage: ["尚无封面，可在编辑时上传", "No cover yet — upload one while editing"],
+  removeCover: ["移除封面", "Remove cover"],
   uploadFailed: ["图片上传失败，原有图片和编辑内容已保留。", "Upload failed. Your previous image and recipe edits have been kept."],
   imageInvalid: ["请选择有效的 JPEG、PNG 或 WebP 图片。", "Choose a valid JPEG, PNG or WebP image."], imageTooLarge: ["图片超过 5 MB，请选择较小的图片。", "This image exceeds 5 MB. Choose a smaller image."],
   forbidden: ["你没有执行此操作的权限。", "You do not have permission to do this."], invalidFields: ["请检查标出的内容。", "Please check the highlighted fields."],
